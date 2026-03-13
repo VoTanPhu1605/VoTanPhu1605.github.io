@@ -105,46 +105,30 @@ document.querySelectorAll('.service-card, .why-card, .review-card, .pricing-card
   revealObserver.observe(el);
 });
 
-// ===== CONTACT FORM (Formspree) =====
+// ===== CONTACT FORM (Web3Forms) =====
 const form = document.getElementById('contactForm');
 const successMsg = document.getElementById('formSuccess');
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   const btn = form.querySelector('button[type="submit"]');
-  const action = form.getAttribute('action');
-
-  // Nếu chưa cấu hình Formspree, mở mailto thay thế
-  if (!action || action.includes('YOUR_FORM_ID')) {
-    const name = document.getElementById('name').value;
-    const phone = document.getElementById('phone').value;
-    const service = document.getElementById('service').value;
-    const message = document.getElementById('message').value;
-    const body = encodeURIComponent(
-      `Họ tên: ${name}\nSố điện thoại: ${phone}\nDịch vụ: ${service}\nMô tả: ${message}`
-    );
-    window.location.href = `mailto:votanphu010@gmail.com?subject=Yêu cầu hỗ trợ máy tính&body=${body}`;
-    return;
-  }
-
   btn.disabled = true;
   btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...';
 
   try {
     const data = new FormData(form);
-    const res = await fetch(action, {
+    const res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      body: data,
-      headers: { Accept: 'application/json' }
+      body: data
     });
+    const json = await res.json();
 
-    if (res.ok) {
+    if (json.success) {
       successMsg.classList.add('show');
       form.reset();
       setTimeout(() => successMsg.classList.remove('show'), 7000);
     } else {
-      const json = await res.json();
-      alert(json?.errors?.map(e => e.message).join(', ') || 'Gửi thất bại, vui lòng thử lại!');
+      alert(json.message || 'Gửi thất bại, vui lòng thử lại!');
     }
   } catch {
     alert('Lỗi kết nối. Vui lòng gọi trực tiếp: 0969 610 972');
